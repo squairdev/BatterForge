@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BatterForge</title>
+  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400&display=swap" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+  <link href="iconRounded.png" rel="icon">
+</head>
+<body>
+  <h1>BatterForge<a class="upload" target="_blank" href="upload/">upload your own</a></h1>
+  <input type="text" id="search" placeholder="Search by name or creator..." />
+
+  <div class="container" id="batterContainer">Loading...</div>
+  <p style="text-align: center;">That's all that we have. If you have a .batter file,<br>please upload it (with proper credit)!</p>
+  <a class="upload" style="width: 20%; margin-top: 0px;" target="_blank" href="upload/">upload your own</a>
+  <script>
+    let allBatters = [];
+
+    function convertSocials(text) {
+      return text.split(/<br\s*\/?>/i)
+        .map(link => {
+          const url = link.trim();
+          return `<a href="${url}" target="_blank">${url}</a>`;
+        })
+        .join('');
+    }
+
+    function renderBatters(filteredBatters) {
+      const container = document.getElementById('batterContainer');
+      container.innerHTML = '';
+
+      if (filteredBatters.length === 0) {
+        container.innerHTML = '<p>No results found.</p>';
+        return;
+      }
+
+      filteredBatters.forEach(batter => {
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        card.innerHTML = `
+        <div class="card-content" style="display: flex; flex-direction: column; height: 100%;">
+            <img src="${batter.image}" alt="${batter.name}">
+            <h2>${batter.name}</h2>
+            <p class="description">${batter.description}</p>
+
+            <div class="meta">
+            <strong>Creator(s):</strong>
+            ${batter.creator}
+            </div>
+
+            ${
+            batter.hassocials
+                ? `<div class="meta"><strong>Socials:</strong><div class="socials">${convertSocials(batter.socials)}</div></div>`
+                : '<div class="meta"><strong>Socials:</strong><div class="socials">None provided</div></div>'
+            }
+
+            <div class="downloadcont">
+            <a class="download" href="${batter.batter}" target="_blank">Download .batter</a>
+            </div>
+        </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function filterBatters(query) {
+      const q = query.toLowerCase();
+      const filtered = allBatters.filter(batter =>
+        batter.name.toLowerCase().includes(q) ||
+        batter.creator.toLowerCase().includes(q)
+      );
+      renderBatters(filtered);
+    }
+
+    document.getElementById('search').addEventListener('input', e => {
+      filterBatters(e.target.value);
+    });
+
+    fetch('/batters.json')
+      .then(res => res.json())
+      .then(data => {
+        allBatters = data.batters;
+        renderBatters(allBatters);
+      })
+      .catch(err => {
+        document.getElementById('batterContainer').innerText = 'Failed to load batters.';
+        console.error(err);
+      });
+  </script>
+  <div id="line-background"></div>
+<script>
+const container = document.getElementById('line-background');
+
+function createLine() {
+    const line = document.createElement('div');
+    line.classList.add('line');
+
+    const y = Math.random() * window.innerHeight;
+    const width = 100 + Math.random() * 400;
+    const duration = 3 + Math.random() * 3;
+
+    line.style.top = `${y}px`;
+    line.style.width = `${width}px`;
+    line.style.animationDuration = `${duration}s`;
+
+    container.appendChild(line);
+
+    setTimeout(() => line.remove(), duration * 1000);
+}
+
+setInterval(createLine, 150);
+</script>
+</body>
+</html>
