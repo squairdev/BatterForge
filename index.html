@@ -79,7 +79,7 @@
       filterBatters(e.target.value);
     });
 
-    fetch('https://github.com/squairdev/BatterForge/raw/refs/heads/main/batters.json')
+    fetch('https://squairdev.github.io/BatterForge/batters.json')
       .then(res => res.json())
       .then(data => {
         allBatters = data.batters;
